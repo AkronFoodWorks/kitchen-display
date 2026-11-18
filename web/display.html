@@ -87,6 +87,7 @@
     margin-right: .6rem;
   }
   h1 {
+    white-space: nowrap;
     font-family: var(--display);
     font-weight: 900;
     font-size: 2.3rem;
@@ -94,10 +95,12 @@
     letter-spacing: -.02em;
     color: var(--green-deep);
   }
-  html.portrait h1 { font-size: 2.5rem; }
+  html.portrait h1 { font-size: 1.9rem; }
   h1 em { font-style: italic; font-weight: 500; color: var(--amber); }
   .meta { text-align: right; font-family: var(--display); }
-  .meta .day { font-weight: 900; font-size: 1.5rem; line-height: 1; color: var(--green-deep); }
+  .meta .clock { font-weight: 900; font-size: 2.3rem; line-height: .95; letter-spacing: -.02em; color: var(--green-deep); white-space: nowrap; }
+  .meta .clock small { font-size: .5em; font-weight: 600; letter-spacing: .02em; margin-left: .15em; }
+  html.portrait .meta .clock { font-size: 2rem; }
   .meta .date { font-style: italic; font-weight: 500; font-size: .95rem; color: var(--amber); margin-top: .25rem; }
   .meta .updated {
     font-family: var(--body);
@@ -152,6 +155,7 @@
     z-index: 2;
   }
   .overnight .now-pill { color: #1E3A2D; }
+  .tick.day-mark { color: var(--amber); font-weight: 900; }
   .tick {
     position: absolute;
     font-family: var(--display);
@@ -185,6 +189,7 @@
     word-break: break-word;
   }
   .b-time { font-weight: 700; font-size: .66rem; margin-top: .2rem; opacity: .92; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .block.m .b-title { -webkit-line-clamp: 2; }
   .block.s .b-title { -webkit-line-clamp: 1; }
   .block.s .b-time { margin-top: .05rem; }
   .block.xs { justify-content: center; padding-top: 0; padding-bottom: 0; }
@@ -281,11 +286,11 @@
 <body class="day">
 <header>
   <div>
-    <div class="eyebrow" id="eyebrow">Akron Food Works &middot; Today in the kitchen</div>
-    <h1 id="title">What&rsquo;s cooking<br><em>today.</em></h1>
+    <div class="eyebrow">Akron Food Works &middot; In the kitchen</div>
+    <h1 id="title">What&rsquo;s cooking <em>today.</em></h1>
   </div>
   <div class="meta">
-    <div class="day" id="meta-day"></div>
+    <div class="clock" id="clock"></div>
     <div class="date" id="meta-date"></div>
     <div class="updated" id="updated">Loading&hellip;</div>
   </div>
@@ -306,10 +311,10 @@
   var POLL_MS = 3 * 60 * 1000;        // ask for new data every 3 minutes
   var TICK_MS = 60 * 1000;            // move the "now" line once a minute
   var STALE_MS = 15 * 60 * 1000;      // flag the data as old after 15 minutes
-  var DAY_VIEW_FROM = 6;              // 6am: switch to the day view
-  var NIGHT_VIEW_FROM = 20;           // 8pm: switch to the overnight view
-  var DAY_WINDOW = [6, 22];           // day view shows 6am–10pm
-  var NIGHT_WINDOW = [20, 32];        // overnight shows 8pm–8am next day
+  var DAY_THEME_FROM = 6;             // 6am: switch to the light day theme
+  var NIGHT_THEME_FROM = 22;          // 10pm: switch to the dark overnight theme
+  var HOURS_BEHIND = 4;               // the timeline keeps the last 4 hours…
+  var HOURS_AHEAD = 12;               // …and the next 12, rolling forward each hour
   var HOUR = 3600 * 1000;
 
   var SPACES = [
@@ -336,9 +341,8 @@
     timeZone: TZ, hourCycle: "h23",
     year: "numeric", month: "numeric", day: "numeric", hour: "numeric", minute: "numeric"
   });
-  var dayFmt = new Intl.DateTimeFormat("en-US", { timeZone: TZ, weekday: "long" });
-  var dateFmt = new Intl.DateTimeFormat("en-US", { timeZone: TZ, month: "long", day: "numeric", year: "numeric" });
-  var shortFmt = new Intl.DateTimeFormat("en-US", { timeZone: TZ, weekday: "short", month: "short", day: "numeric" });
+  var dateFmt = new Intl.DateTimeFormat("en-US", { timeZone: TZ, weekday: "long", month: "long", day: "numeric" });
+  var weekdayFmt = new Intl.DateTimeFormat("en-US", { timeZone: TZ, weekday: "short" });
 
   function parts(ms) {
     var p = {};
@@ -375,16 +379,15 @@
   }
   function now() { return Date.now() + clockSkew; }
 
+  // The timeline starts HOURS_BEHIND before the current hour, so it only
+  // redraws once an hour; the now line moves within it every minute.
   function windowFor(t) {
-    var h = parts(t).h;
-    var view = params.view || (h >= DAY_VIEW_FROM && h < NIGHT_VIEW_FROM ? "day" : "overnight");
-    var mid = midnightOf(t);
-    if (view === "day") {
-      return { view: view, base: mid, start: mid + DAY_WINDOW[0] * HOUR, end: mid + DAY_WINDOW[1] * HOUR };
-    }
-    // Before 8am the overnight that started last evening is still running.
-    var base = h < (NIGHT_WINDOW[1] - 24) ? midnightOf(mid - 12 * HOUR) : mid;
-    return { view: "overnight", base: base, start: base + NIGHT_WINDOW[0] * HOUR, end: base + NIGHT_WINDOW[1] * HOUR };
+    var p = parts(t);
+    var view = params.view || (p.h >= DAY_THEME_FROM && p.h < NIGHT_THEME_FROM ? "day" : "overnight");
+    var hourStart = t - (t % 60000) - p.mi * 60000;
+    var start = hourStart - HOURS_BEHIND * HOUR;
+    var end = hourStart + (HOURS_AHEAD + 1) * HOUR;
+    return { view: view, start: start, end: end, key: view + start };
   }
 
   /* ================= colours ================= */
@@ -429,18 +432,11 @@
     document.body.className = w.view;
 
     // header
-    if (w.view === "overnight") {
-      document.getElementById("eyebrow").textContent = "Akron Food Works · Tonight in the kitchen";
-      document.getElementById("title").innerHTML = "Cooking<br><em>through the night.</em>";
-      document.getElementById("meta-day").textContent = "Tonight";
-      document.getElementById("meta-date").textContent = shortFmt.format(new Date(w.start)) + " → " + shortFmt.format(new Date(w.end));
-    } else {
-      document.getElementById("eyebrow").textContent = "Akron Food Works · Today in the kitchen";
-      document.getElementById("title").innerHTML = "What’s cooking<br><em>today.</em>";
-      document.getElementById("meta-day").textContent = dayFmt.format(new Date(w.start));
-      document.getElementById("meta-date").textContent = dateFmt.format(new Date(w.start));
-    }
+    document.getElementById("title").innerHTML = w.view === "overnight"
+      ? "Cooking <em>through the night.</em>"
+      : "What’s cooking <em>today.</em>";
 
+    updateClock(now());
     var card = document.getElementById("card");
     if (!bookings) return;   // keep the "Loading" message until data arrives
 
@@ -456,10 +452,15 @@
 
     // hour ticks: portrait = down the side, landscape = across the top
     var tickHost = layout === "portrait" ? side : heads;
+    var ticks = live.ticks = [];
     for (var i = 0; i <= hours; i++) {
-      var t = el("div", "tick", clock(w.start + i * HOUR));
+      var tAt = w.start + i * HOUR;
+      var t = parts(tAt).h === 0
+        ? el("div", "tick day-mark", weekdayFmt.format(new Date(tAt)))
+        : el("div", "tick", clock(tAt));
       setPos(t, i / hours * 100);
       tickHost.appendChild(t);
+      ticks.push({ node: t, at: tAt });
     }
 
     // column headers (portrait) — spaces sharing a group get one title
@@ -549,7 +550,7 @@
         var startPct = (s - w.start) / span * 100, lenPct = (e - s) / span * 100;
         var lenRem = laneLen * lenPct / 100 / rem;
         var size = layout === "portrait"
-          ? (lenRem < 1.2 ? " xs tiny" : lenRem < 2.3 ? " xs" : lenRem < 3.6 ? " s" : "")
+          ? (lenRem < 1.2 ? " xs tiny" : lenRem < 2.3 ? " xs" : lenRem < 3.6 ? " s" : lenRem < 5.2 ? " m" : "")
           : (lenRem < 3.5 ? " xs tiny" : lenRem < 6 ? " xs" : lenRem < 9 ? " s" : "");
         var cls = "block" + size + (isLight(ln.color) ? " dark" : "")
           + (b.startDate < w.start ? " cont-start" : "") + (b.endDate > w.end ? " cont-end" : "");
@@ -569,9 +570,18 @@
     tick();
   }
 
+  function updateClock(t) {
+    var cp = parts(t);
+    document.getElementById("clock").innerHTML = (cp.h % 12 || 12) + ":" + (cp.mi < 10 ? "0" : "") + cp.mi
+      + "<small>" + (cp.h < 12 ? "AM" : "PM") + "</small>";
+    document.getElementById("meta-date").textContent = dateFmt.format(new Date(t));
+  }
+
   function tick() {
     var t = now();
-    if (!current || t >= current.end || windowFor(t).view !== current.view) { render(); return; }
+    if (!current || windowFor(t).key !== current.key) { render(); return; }
+
+    updateClock(t);
 
     var pct = (t - current.start) / (current.end - current.start) * 100;
     var visible = pct >= 0 && pct <= 100;
@@ -585,6 +595,10 @@
         setPos(live.line, pct);
         setPos(live.pill, pct);
         live.pill.textContent = "Now " + clock(t);
+        // hide the hour label the Now marker would sit on top of
+        live.ticks.forEach(function (tk) {
+          tk.node.style.visibility = Math.abs(tk.at - t) < 25 * 60000 ? "hidden" : "";
+        });
       }
       live.blocks.forEach(function (b) {
         var want = b.cls + (b.end <= t ? " done" : "");
@@ -673,7 +687,8 @@
   render();
   load();
   setInterval(load, POLL_MS);
-  setInterval(tick, TICK_MS);
+  // Line the minute tick up with the real minute so the clock never lags.
+  setTimeout(function () { tick(); setInterval(tick, TICK_MS); }, TICK_MS - (now() % TICK_MS) + 50);
   var resizeTimer;
   window.addEventListener("resize", function () {
     clearTimeout(resizeTimer);
