@@ -47,10 +47,11 @@ as afw-tools cloud save** and doesn't touch member data.
 
 | Add to the URL | Effect |
 | --- | --- |
-| *(nothing)* | Layout follows the screen's shape. The timeline always shows the last 4 hours and the next 12. Light theme 6am–10pm, dark theme 10pm–6am |
+| *(nothing)* | Layout follows the screen's shape. The timeline always shows the last 2 hours and the next 10. Light theme 6am–10pm, dark theme 10pm–6am |
 | `?layout=portrait` or `?layout=landscape` | Force a layout |
 | `?view=day` or `?view=overnight` | Force the light or dark theme |
 | `?demo` | Sample bookings, for previewing the design |
 | `?now=2026-11-18T21:15` | Pretend it's that time in Akron (for previews) |
+| `?debug` | Show the resolution the player actually renders at (bottom of the screen) |
 
 Combine options with `&`, e.g. `?demo&layout=portrait&now=2026-11-18T14:20`.
