@@ -308,6 +308,8 @@
   var ENDPOINT = "https://pyavgjemukfiiruawdgg.supabase.co/functions/v1/kitchen-schedule";
   var TZ = "America/New_York";
   var POLL_MS = 3 * 60 * 1000;        // ask for new data every 3 minutes
+  var VERSION_CHECK_MS = 10 * 60 * 1000; // look for a newly published page every 10 minutes
+  var BUILD = "__BUILD__";            // replaced with the commit id when deployed
   var TICK_MS = 60 * 1000;            // move the "now" line once a minute
   var STALE_MS = 15 * 60 * 1000;      // flag the data as old after 15 minutes
   var DAY_THEME_FROM = 6;             // 6am: switch to the light day theme
@@ -703,10 +705,29 @@
       + " \u00b7 screen " + screen.width + "\u00d7" + screen.height + " \u00b7 " + layout;
   }
 
+  // When a new version of this page is published, load it. The new URL
+  // carries the version so no cache can hand back the old copy.
+  function checkVersion() {
+    if (!/^[0-9a-f]{7,40}$/.test(BUILD)) return;   // local copy, not deployed
+    fetch("version.txt?t=" + Date.now(), { cache: "no-store" })
+      .then(function (r) { return r.ok ? r.text() : ""; })
+      .then(function (v) {
+        v = (v || "").trim();
+        if (!/^[0-9a-f]{7,40}$/.test(v) || v === BUILD) return;
+        var q = location.search.replace(/^\?/, "").split("&").filter(function (kv) {
+          return kv && kv.indexOf("v=") !== 0;
+        });
+        q.push("v=" + v.slice(0, 7));
+        location.replace(location.pathname + "?" + q.join("&"));
+      })
+      .catch(function () {});
+  }
+
   /* ================= start ================= */
   render();
   load();
   setInterval(load, POLL_MS);
+  setInterval(checkVersion, VERSION_CHECK_MS);
   // Line the minute tick up with the real minute so the clock never lags.
   setTimeout(function () { tick(); setInterval(tick, TICK_MS); }, TICK_MS - (now() % TICK_MS) + 50);
   var resizeTimer;
