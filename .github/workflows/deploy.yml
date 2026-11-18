@@ -20,7 +20,10 @@ jobs:
       - name: Assemble site
         run: |
           mkdir -p dist
-          cp web/display.html dist/index.html
+          # Stamp the page with this commit so open TVs can spot a newer version.
+          sed "s/__BUILD__/${GITHUB_SHA}/" web/display.html > dist/index.html
+          echo "${GITHUB_SHA}" > dist/version.txt
+          grep -q "${GITHUB_SHA}" dist/index.html
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
