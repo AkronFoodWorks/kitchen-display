@@ -6,7 +6,7 @@
 <title>Akron Food Works — Kitchen Schedule</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,500;0,600;0,900;1,500&family=Hanken+Grotesk:wght@600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,500;0,600;0,900;1,500&family=Hanken+Grotesk:wght@600;700;800&family=Barlow+Condensed:wght@600;700&display=swap" rel="stylesheet">
 <script>
   /* Pick the layout before anything paints: ?layout=portrait|landscape wins,
      otherwise follow the screen's shape. */
@@ -21,44 +21,49 @@
      no animations, no blur/filters, few elements, and everything sized
      in rem off the viewport width so it scales to any TV resolution. */
   :root {
-    --cream: #FBF6EC;
+    /* Deeper, higher-contrast palette: TVs in bright picture modes wash
+       pale creams out to flat white, so surfaces are a step darker and
+       lines/text a step stronger than they'd be on a laptop. */
+    --page: #E9DCC2;
     --paper: #FFFDF8;
-    --ink: #23372B;
-    --ink-soft: #4A5A4E;
-    --green: #2C5440;
+    --lane: #F6EFE1;
+    --ink: #17291E;
+    --ink-soft: #33463A;
     --green-deep: #1E3A2D;
-    --amber: #C8612E;
-    --gold: #D9A441;
-    --line: #E2D9C6;
-    --past: rgba(226,217,198,.45);
+    --amber: #A9461A;
+    --line: #CDBB98;
+    --past: rgba(110,85,40,.20);
     --display: 'Fraunces', Georgia, serif;
     --body: 'Hanken Grotesk', 'Helvetica Neue', Arial, sans-serif;
+    /* condensed face for booking names: fits narrow columns at large sizes */
+    --tight: 'Barlow Condensed', 'Arial Narrow', 'Roboto Condensed', sans-serif;
   }
   .overnight {
-    --cream: #23402F;
-    --paper: #1A3326;
+    --page: #16301F;
+    --paper: #1E3A2D;
+    --lane: #27473A;
     --ink: #FFFDF8;
-    --ink-soft: #CFC9BA;
-    --amber: #D9A441;
+    --ink-soft: #E4DDCB;
     --green-deep: #FFFDF8;
-    --line: rgba(255,253,248,.10);
-    --past: rgba(0,0,0,.18);
+    --amber: #F0B54A;
+    --line: rgba(255,253,248,.22);
+    --past: rgba(0,0,0,.28);
   }
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  /* 1rem ≈ 20px on a 1080-wide portrait screen or a 1920-wide landscape one. */
   html { font-size: 1.05vw; }
   html.portrait { font-size: 1.9vw; }
   html, body { height: 100%; }
   body {
     font-family: var(--body);
     color: var(--ink);
-    background: var(--cream);
-    line-height: 1.3;
+    background: var(--page);
+    line-height: 1.25;
     display: flex;
     flex-direction: column;
     overflow: hidden;
-    padding: 1.1rem 1.3rem .8rem;
+    padding: .9rem 1rem .6rem;
   }
-  body.overnight { background: #1E3A2D; }
 
   /* ---------- header ---------- */
   header {
@@ -66,50 +71,47 @@
     justify-content: space-between;
     align-items: flex-end;
     flex-shrink: 0;
-    margin-bottom: .9rem;
+    margin-bottom: .7rem;
   }
   .eyebrow {
-    font-size: .68rem;
-    letter-spacing: .28em;
+    font-size: .85rem;
+    letter-spacing: .22em;
     text-transform: uppercase;
     font-weight: 700;
     color: var(--amber);
-    margin-bottom: .4rem;
+    margin-bottom: .35rem;
     white-space: nowrap;
-  }
-  .eyebrow::before {
-    content: "";
-    display: inline-block;
-    width: 2rem;
-    height: 2px;
-    background: currentColor;
-    vertical-align: middle;
-    margin-right: .6rem;
   }
   h1 {
     white-space: nowrap;
     font-family: var(--display);
     font-weight: 900;
-    font-size: 2.3rem;
-    line-height: .98;
+    font-size: 2.6rem;
+    line-height: 1;
     letter-spacing: -.02em;
     color: var(--green-deep);
   }
-  html.portrait h1 { font-size: 1.9rem; }
+  html.portrait h1 { font-size: 2.15rem; }
   h1 em { font-style: italic; font-weight: 500; color: var(--amber); }
-  .meta { text-align: right; font-family: var(--display); }
-  .meta .clock { font-weight: 900; font-size: 2.3rem; line-height: .95; letter-spacing: -.02em; color: var(--green-deep); white-space: nowrap; }
-  .meta .clock small { font-size: .5em; font-weight: 600; letter-spacing: .02em; margin-left: .15em; }
-  html.portrait .meta .clock { font-size: 2rem; }
-  .meta .date { font-style: italic; font-weight: 500; font-size: .95rem; color: var(--amber); margin-top: .25rem; }
+  .meta { text-align: right; }
+  .meta .clock {
+    font-family: var(--display);
+    font-weight: 900;
+    font-size: 3.6rem;
+    line-height: .9;
+    letter-spacing: -.02em;
+    color: var(--green-deep);
+    white-space: nowrap;
+  }
+  .meta .clock small { font-size: .42em; font-weight: 700; letter-spacing: .02em; margin-left: .12em; }
+  .meta .date { font-weight: 700; font-size: 1.3rem; color: var(--amber); margin-top: .2rem; white-space: nowrap; }
   .meta .updated {
-    font-family: var(--body);
-    font-size: .6rem;
-    letter-spacing: .14em;
+    font-size: .8rem;
+    letter-spacing: .1em;
     text-transform: uppercase;
     font-weight: 700;
     color: var(--ink-soft);
-    margin-top: .45rem;
+    margin-top: .3rem;
   }
   .meta .updated.stale { color: var(--amber); }
 
@@ -118,9 +120,9 @@
     flex: 1;
     min-height: 0;
     background: var(--paper);
-    border: 1px solid var(--line);
+    border: 2px solid var(--line);
     border-radius: .8rem;
-    padding: .8rem .9rem .9rem;
+    padding: .6rem .5rem .6rem .4rem;
     display: flex;
     flex-direction: column;
   }
@@ -131,93 +133,92 @@
   .lane {
     flex: 1;
     position: relative;
-    background-color: var(--cream);
-    border: 1px solid var(--line);
+    background-color: var(--lane);
+    border: 2px solid var(--line);
     border-radius: .5rem;
     overflow: hidden;
   }
-  .overlay { position: absolute; top: 0; left: 0; right: 0; bottom: 0; pointer-events: none; }
   .past { position: absolute; background: var(--past); }
-  .block.done { opacity: .45; }
-  .block.tiny .b-title, .block.tiny .b-time { display: none; }
   .now-line { position: absolute; background: var(--amber); }
   .now-pill {
     position: absolute;
     background: var(--amber);
     color: #FFFDF8;
-    font-family: var(--body);
     font-weight: 700;
-    font-size: .62rem;
-    letter-spacing: .04em;
-    padding: .12rem .4rem;
+    font-size: 1.05rem;
+    letter-spacing: .03em;
+    text-transform: uppercase;
+    padding: .1rem .45rem;
     border-radius: 1rem;
     white-space: nowrap;
     z-index: 2;
   }
-  .overnight .now-pill { color: #1E3A2D; }
-  .tick.day-mark { color: var(--amber); font-weight: 900; }
+  .overnight .now-pill { color: #16301F; }
   .tick {
     position: absolute;
-    font-family: var(--display);
-    font-weight: 600;
-    font-size: .72rem;
-    color: var(--ink-soft);
+    font-weight: 700;
+    font-size: 1.3rem;
+    color: var(--ink);
     white-space: nowrap;
   }
+  .tick.day-mark { color: var(--amber); font-weight: 800; }
 
   /* ---------- bookings ---------- */
   .block {
     position: absolute;
     border-radius: .45rem;
     overflow: hidden;
-    color: #FFFDF8;
+    color: #FFFFFF;
     display: flex;
     flex-direction: column;
-    padding: .35rem .5rem;
+    padding: .4rem .4rem;
   }
-  .block.dark { color: #23372B; }
+  .block.dark { color: #17291E; }
+  .block.done { opacity: .5; }
   .b-title {
-    font-family: var(--display);
-    font-weight: 900;
-    font-size: .95rem;
-    line-height: 1.08;
-    letter-spacing: -.01em;
+    font-family: var(--tight);
+    font-weight: 700;
+    font-size: 1.8rem;
+    line-height: 1.02;
     display: -webkit-box;
-    -webkit-line-clamp: 3;
+    -webkit-line-clamp: 4;
     -webkit-box-orient: vertical;
     overflow: hidden;
-    word-break: break-word;
+    overflow-wrap: break-word;
+    -webkit-hyphens: auto;
+    hyphens: auto;
   }
-  .b-time { font-weight: 700; font-size: .66rem; margin-top: .2rem; opacity: .92; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .b-time { font-family: var(--tight); font-weight: 600; font-size: 1.45rem; margin-top: .2rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .block.live .b-time { font-weight: 800; }
+  .block.l .b-title { -webkit-line-clamp: 3; }
   .block.m .b-title { -webkit-line-clamp: 2; }
   .block.s .b-title { -webkit-line-clamp: 1; }
   .block.s .b-time { margin-top: .05rem; }
   .block.xs { justify-content: center; padding-top: 0; padding-bottom: 0; }
-  .block.xs .b-title { -webkit-line-clamp: 1; font-size: .8rem; }
-  html.landscape .block.xs .b-title { display: block; white-space: nowrap; text-overflow: ellipsis; }
+  .block.xs .b-title { -webkit-line-clamp: 1; font-size: 1.5rem; }
   .block.xs .b-time { display: none; }
+  .block.tiny .b-title, .block.tiny .b-time { display: none; }
+  html.landscape .block.xs .b-title { display: block; white-space: nowrap; text-overflow: ellipsis; }
   .open {
     position: absolute;
-    font-family: var(--display);
-    font-style: italic;
-    font-weight: 500;
-    font-size: .78rem;
+    font-weight: 600;
+    font-size: 1.1rem;
     color: var(--ink-soft);
   }
 
   /* ---------- portrait: spaces are columns, time runs down ---------- */
-  html.portrait .heads { margin-left: 3rem; margin-bottom: .55rem; }
-  html.portrait .group { margin: 0 .15rem; text-align: center; }
+  html.portrait .heads { margin-left: 3.3rem; margin-bottom: .45rem; }
+  html.portrait .group { margin: 0 .1rem; text-align: center; }
   html.portrait .g-title {
     font-family: var(--display);
     font-weight: 900;
-    font-size: .9rem;
-    line-height: 1.05;
+    font-size: 1.3rem;
+    line-height: 1.02;
     color: var(--green-deep);
-    padding-bottom: .3rem;
+    padding-bottom: .25rem;
     border-bottom: 2px solid var(--line);
-    margin: 0 .15rem .3rem;
-    height: 2.4rem;
+    margin: 0 .1rem .25rem;
+    height: 3.05rem;
     display: flex;
     align-items: flex-end;
     justify-content: center;
@@ -225,60 +226,58 @@
   html.portrait .g-subs { display: flex; }
   html.portrait .g-sub {
     flex: 1;
-    font-family: var(--display);
-    font-style: italic;
-    font-weight: 500;
-    font-size: .72rem;
+    font-weight: 700;
+    font-size: 1.02rem;
     line-height: 1.1;
     color: var(--amber);
-    padding-bottom: .3rem;
-    border-bottom: .3rem solid;
-    margin: 0 .15rem;
+    padding-bottom: .25rem;
+    border-bottom: .4rem solid;
+    margin: 0 .1rem;
     border-radius: 0 0 .15rem .15rem;
+    white-space: nowrap;
   }
-  html.portrait .side { width: 3rem; }
-  html.portrait .tick { right: .5rem; transform: translateY(-50%); }
-  html.portrait .now-pill { right: .1rem; transform: translateY(-50%); }
+  html.portrait .side { width: 3.3rem; }
+  html.portrait .tick { right: .35rem; transform: translateY(-50%); }
+  html.portrait .now-pill { right: .05rem; transform: translateY(-50%); }
   html.portrait .tracks { flex-direction: row; }
-  html.portrait .lane { margin: 0 .15rem; }
+  html.portrait .lane { margin: 0 .1rem; }
   html.portrait .past { left: 0; right: 0; top: 0; }
-  html.portrait .now-line { left: 0; right: 0; height: 3px; margin-top: -1px; }
-  html.portrait .block { left: .2rem; right: .2rem; }
+  html.portrait .now-line { left: 0; right: 0; height: 4px; margin-top: -2px; }
+  html.portrait .block { left: .15rem; right: .15rem; }
   html.portrait .block.cont-start { border-top-left-radius: 0; border-top-right-radius: 0; }
   html.portrait .block.cont-end { border-bottom-left-radius: 0; border-bottom-right-radius: 0; }
   html.portrait .open { top: .6rem; left: 0; right: 0; text-align: center; }
 
   /* ---------- landscape: spaces are rows, time runs across ---------- */
-  html.landscape .heads { margin-left: 12rem; height: 1.3rem; margin-bottom: .3rem; }
+  html.landscape .heads { margin-left: 13rem; height: 1.9rem; margin-bottom: .3rem; }
   html.landscape .tick { bottom: .15rem; transform: translateX(-50%); }
-  html.landscape .now-pill { bottom: .05rem; transform: translateX(-50%); }
-  html.landscape .side { width: 12rem; display: flex; flex-direction: column; }
+  html.landscape .now-pill { bottom: .1rem; transform: translateX(-50%); }
+  html.landscape .side { width: 13rem; display: flex; flex-direction: column; }
   html.landscape .label { flex: 1; display: flex; align-items: center; margin: .2rem 0; padding-right: .8rem; }
-  html.landscape .swatch { width: .4rem; align-self: stretch; border-radius: .2rem; margin-right: .6rem; flex-shrink: 0; }
-  html.landscape .l-1 { font-family: var(--display); font-weight: 900; font-size: 1.05rem; line-height: 1.05; color: var(--green-deep); }
-  html.landscape .l-2 { font-family: var(--display); font-style: italic; font-weight: 500; font-size: .8rem; color: var(--amber); }
+  html.landscape .swatch { width: .5rem; align-self: stretch; border-radius: .2rem; margin-right: .6rem; flex-shrink: 0; }
+  html.landscape .l-1 { font-family: var(--display); font-weight: 900; font-size: 1.35rem; line-height: 1.05; color: var(--green-deep); }
+  html.landscape .l-2 { font-weight: 700; font-size: 1.05rem; color: var(--amber); }
   html.landscape .tracks { flex-direction: column; }
   html.landscape .lane { margin: .2rem 0; }
   html.landscape .past { top: 0; bottom: 0; left: 0; }
-  html.landscape .now-line { top: 0; bottom: 0; width: 3px; margin-left: -1px; }
+  html.landscape .now-line { top: 0; bottom: 0; width: 4px; margin-left: -2px; }
   html.landscape .block { top: .25rem; bottom: .25rem; justify-content: center; }
-  html.landscape .block .b-title { -webkit-line-clamp: 2; }
+  html.landscape .block .b-title { display: block; white-space: nowrap; text-overflow: ellipsis; }
   html.landscape .block.cont-start { border-top-left-radius: 0; border-bottom-left-radius: 0; }
   html.landscape .block.cont-end { border-top-right-radius: 0; border-bottom-right-radius: 0; }
   html.landscape .open { top: 0; bottom: 0; left: .9rem; display: flex; align-items: center; }
 
   /* ---------- footer / messages ---------- */
-  footer { flex-shrink: 0; text-align: center; margin-top: .6rem; }
-  footer .mark { font-family: var(--display); font-weight: 900; letter-spacing: .12em; font-size: .8rem; color: var(--green-deep); }
-  footer .tag { letter-spacing: .32em; text-transform: uppercase; font-size: .55rem; font-weight: 700; color: var(--amber); margin-top: .1rem; }
+  footer { flex-shrink: 0; text-align: center; margin-top: .45rem; }
+  footer .mark { font-family: var(--display); font-weight: 900; letter-spacing: .14em; font-size: .9rem; color: var(--green-deep); }
+  .debug { font-size: .8rem; font-weight: 700; color: var(--amber); }
   .message {
     flex: 1;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-family: var(--display);
-    font-style: italic;
-    font-size: 1.2rem;
+    font-size: 1.5rem;
+    font-weight: 600;
     color: var(--ink-soft);
   }
 </style>
@@ -298,7 +297,7 @@
 <div class="card" id="card"><div class="message">Loading the schedule&hellip;</div></div>
 <footer>
   <div class="mark">AKRON FOOD WORKS</div>
-  <div class="tag">Create &middot; Incubate &middot; Elevate</div>
+  <div class="debug" id="debug"></div>
 </footer>
 
 <script>
@@ -313,8 +312,9 @@
   var STALE_MS = 15 * 60 * 1000;      // flag the data as old after 15 minutes
   var DAY_THEME_FROM = 6;             // 6am: switch to the light day theme
   var NIGHT_THEME_FROM = 22;          // 10pm: switch to the dark overnight theme
-  var HOURS_BEHIND = 4;               // the timeline keeps the last 4 hours…
-  var HOURS_AHEAD = 12;               // …and the next 12, rolling forward each hour
+  var HOURS_BEHIND = 2;               // the timeline keeps the last 2 hours…
+  var HOURS_AHEAD = 10;               // …and the next 10, rolling forward each hour
+                                      // (fewer hours = taller bookings = bigger text)
   var HOUR = 3600 * 1000;
 
   var SPACES = [
@@ -365,6 +365,12 @@
     var p = parts(ms);
     var h12 = p.h % 12 || 12;
     return h12 + (p.mi ? ":" + (p.mi < 10 ? "0" : "") + p.mi : "") + (p.h < 12 ? "a" : "p");
+  }
+  // "1:30–3:30p" when both ends share am/pm, otherwise "11p–6a"
+  function timeRange(a, b) {
+    var sa = clock(a), sb = clock(b);
+    if (sa.slice(-1) === sb.slice(-1)) sa = sa.slice(0, -1);
+    return sa + "\u2013" + sb;
   }
   function clockLong(ms) {
     var p = parts(ms);
@@ -518,17 +524,19 @@
       }
     });
 
-    var overlay = el("div", "overlay");
-    live.line = el("div", "now-line");
+    // shade + now line live inside each lane, under the bookings,
+    // so the line never runs across a booking's name
     live.pasts = [];
+    live.lines = [];
     live.blocks = [];
     laneNodes.forEach(function (ln) {
       var shade = el("div", "past");
+      var line = el("div", "now-line");
       ln.node.appendChild(shade);
+      ln.node.appendChild(line);
       live.pasts.push(shade);
+      live.lines.push(line);
     });
-    overlay.appendChild(live.line);
-    tracks.appendChild(overlay);
     live.pill = el("div", "now-pill");
     tickHost.appendChild(live.pill);
 
@@ -550,20 +558,22 @@
         var startPct = (s - w.start) / span * 100, lenPct = (e - s) / span * 100;
         var lenRem = laneLen * lenPct / 100 / rem;
         var size = layout === "portrait"
-          ? (lenRem < 1.2 ? " xs tiny" : lenRem < 2.3 ? " xs" : lenRem < 3.6 ? " s" : lenRem < 5.2 ? " m" : "")
-          : (lenRem < 3.5 ? " xs tiny" : lenRem < 6 ? " xs" : lenRem < 9 ? " s" : "");
+          ? (lenRem < 1.8 ? " xs tiny" : lenRem < 4.7 ? " xs" : lenRem < 6.5 ? " s" : lenRem < 8.4 ? " m" : lenRem < 10.2 ? " l" : "")
+          : (lenRem < 3.5 ? " xs tiny" : lenRem < 8 ? " xs" : lenRem < 12 ? " s" : "");
         var cls = "block" + size + (isLight(ln.color) ? " dark" : "")
           + (b.startDate < w.start ? " cont-start" : "") + (b.endDate > w.end ? " cont-end" : "");
         var blk = el("div", cls);
         blk.style.background = ln.color;
         setPos(blk, startPct, lenPct);
         blk.appendChild(el("div", "b-title", b.title));
-        blk.appendChild(el("div", "b-time", clock(b.startDate) + " – " + clock(b.endDate)));
+        var timeEl = el("div", "b-time", timeRange(b.startDate, b.endDate));
+        blk.appendChild(timeEl);
         // bottom/right edges sit a hair inside the slot so back-to-back bookings don't touch
         if (layout === "portrait") blk.style.marginTop = "1px"; else blk.style.marginLeft = "1px";
         if (layout === "portrait") blk.style.height = "calc(" + lenPct + "% - 2px)"; else blk.style.width = "calc(" + lenPct + "% - 2px)";
         ln.node.appendChild(blk);
-        live.blocks.push({ node: blk, end: b.endDate, cls: cls });
+        live.blocks.push({ node: blk, time: timeEl, start: b.startDate, end: b.endDate, cls: cls,
+                           range: timeEl.textContent, until: (layout === "portrait" ? "Until " : "Now \u00b7 until ") + clock(b.endDate) });
       });
     });
 
@@ -585,24 +595,27 @@
 
     var pct = (t - current.start) / (current.end - current.start) * 100;
     var visible = pct >= 0 && pct <= 100;
-    if (live.line) {
-      live.line.style.display = live.pill.style.display = visible ? "" : "none";
+    if (live.lines) {
+      live.pill.style.display = visible ? "" : "none";
+      live.lines.forEach(function (ln) { ln.style.display = visible ? "" : "none"; if (visible) setPos(ln, pct); });
       var shadePct = Math.max(0, Math.min(100, pct)) + "%";
       live.pasts.forEach(function (sh) {
         if (layout === "portrait") sh.style.height = shadePct; else sh.style.width = shadePct;
       });
       if (visible) {
-        setPos(live.line, pct);
         setPos(live.pill, pct);
-        live.pill.textContent = "Now " + clock(t);
+        live.pill.textContent = "Now";
         // hide the hour label the Now marker would sit on top of
         live.ticks.forEach(function (tk) {
           tk.node.style.visibility = Math.abs(tk.at - t) < 25 * 60000 ? "hidden" : "";
         });
       }
       live.blocks.forEach(function (b) {
-        var want = b.cls + (b.end <= t ? " done" : "");
+        var running = b.start <= t && t < b.end;
+        var want = b.cls + (b.end <= t ? " done" : running ? " live" : "");
         if (b.node.className !== want) b.node.className = want;
+        var label = running ? b.until : b.range;
+        if (b.time.textContent !== label) b.time.textContent = label;
       });
     }
 
@@ -681,6 +694,13 @@
       ["Warewashing/Cleanup Area", "Deep clean", 22, 23]
     ].map(function (b) { return { calendar: b[0], title: b[1], startDate: at(b[2]), endDate: at(b[3]), color: "" }; });
     return res.concat(list);
+  }
+
+  // ?debug shows what the player actually renders at, to diagnose blurry text.
+  if (params.debug) {
+    document.getElementById("debug").textContent = window.innerWidth + "\u00d7" + window.innerHeight
+      + " css px \u00b7 pixel ratio " + (window.devicePixelRatio || 1)
+      + " \u00b7 screen " + screen.width + "\u00d7" + screen.height + " \u00b7 " + layout;
   }
 
   /* ================= start ================= */
