@@ -24,11 +24,24 @@ const CORS = {
   "Access-Control-Allow-Headers": "authorization, apikey, content-type, x-client-info",
 };
 
-const db = createClient(
-  Deno.env.get("SUPABASE_URL")!,
-  Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
-  { auth: { persistSession: false } },
-);
+// Prefer the new secret key (SUPABASE_SECRET_KEYS is a JSON map; the first
+// key is named "default"). Fall back to the legacy service role key, which
+// Supabase is retiring.
+function serverKey(): string {
+  try {
+    const keys = JSON.parse(Deno.env.get("SUPABASE_SECRET_KEYS") ?? "{}");
+    if (keys.default) return keys.default;
+    const first = Object.values(keys)[0];
+    if (typeof first === "string") return first;
+  } catch { /* not set or not JSON */ }
+  const legacy = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+  if (legacy) return legacy;
+  throw new Error("No Supabase server key available to the function");
+}
+
+const db = createClient(Deno.env.get("SUPABASE_URL")!, serverKey(), {
+  auth: { persistSession: false },
+});
 
 type Booking = { startDate: number; endDate: number; calendar: string; title: string; color: string };
 
