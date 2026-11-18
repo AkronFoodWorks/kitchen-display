@@ -1,0 +1,28 @@
+name: Verify Supabase relay (temporary)
+on:
+  push:
+    branches: [claude/modest-shannon-uc9c8l]
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Call the relay like the TV page would
+        run: |
+          URL=https://pyavgjemukfiiruawdgg.supabase.co/functions/v1/kitchen-schedule
+          echo "== preflight =="
+          curl -sS -D - -o /dev/null -X OPTIONS -H "Origin: https://akronfoodworks.github.io" -H "Access-Control-Request-Method: GET" $URL | grep -iE '^(HTTP|access-control)'
+          echo "== GET =="
+          curl -sS -D - -o body.json -H "Origin: https://akronfoodworks.github.io" $URL | grep -iE '^(HTTP|access-control|content-type)'
+          python3 - <<'PY'
+          import json, datetime, collections
+          j = json.load(open("body.json"))
+          b = j["bookings"]
+          print("fetched_at", j["fetched_at"], "stale", j["stale"], "rows", len(b))
+          print("calendars", sorted({x["calendar"] for x in b}))
+          print("colors", {x["calendar"]: x["color"] for x in b if not x["title"]})
+          print("bookings with titles", sum(1 for x in b if x["title"]))
+          PY
+          echo "== second call (should reuse the cached copy) =="
+          curl -sS $URL | python3 -c "import json,sys; j=json.load(sys.stdin); print('fetched_at', j['fetched_at'])"
+          echo "== payload for local render test =="
+          base64 -w0 body.json; echo
