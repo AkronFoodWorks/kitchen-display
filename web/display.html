@@ -161,7 +161,18 @@
     color: var(--ink);
     white-space: nowrap;
   }
-  .tick.day-mark { color: var(--amber); font-weight: 800; }
+  /* midnight: the hour label becomes the new day's name and date */
+  .tick.day-mark { font-family: var(--tight); color: var(--amber); font-weight: 700; font-size: 1.5rem; line-height: .95; text-align: right; }
+  .tick.day-mark small { display: block; font-size: .72em; color: var(--ink); }
+  html.landscape .tick.day-mark small { display: inline; margin-left: .25em; }
+  /* stripes over the part of the timeline that belongs to another day */
+  .other-day { position: absolute; background-image: repeating-linear-gradient(135deg, rgba(23,41,30,.10) 0, rgba(23,41,30,.10) .45rem, transparent .45rem, transparent 1.1rem); }
+  .overnight .other-day { background-image: repeating-linear-gradient(135deg, rgba(255,253,248,.08) 0, rgba(255,253,248,.08) .45rem, transparent .45rem, transparent 1.1rem); }
+  .day-line { position: absolute; background: var(--ink); }
+  html.portrait .other-day { left: 0; right: 0; }
+  html.portrait .day-line { left: 0; right: 0; height: 5px; margin-top: -2px; }
+  html.landscape .other-day { top: 0; bottom: 0; }
+  html.landscape .day-line { top: 0; bottom: 0; width: 5px; margin-left: -2px; }
 
   /* ---------- bookings ---------- */
   .block {
@@ -207,35 +218,55 @@
   }
 
   /* ---------- portrait: spaces are columns, time runs down ---------- */
-  html.portrait .heads { margin-left: 3.3rem; margin-bottom: .45rem; }
-  html.portrait .group { margin: 0 .1rem; text-align: center; }
-  html.portrait .g-title {
-    font-family: var(--display);
-    font-weight: 900;
-    font-size: 1.3rem;
-    line-height: 1.02;
-    color: var(--green-deep);
-    padding-bottom: .25rem;
-    border-bottom: 2px solid var(--line);
-    margin: 0 .1rem .25rem;
-    height: 3.05rem;
+  /* Column headers are positioned from each column's measured box, so they
+     always line up exactly with the lanes below them. */
+  html.portrait .heads { height: 6.1rem; }
+  .h-group {
+    position: absolute;
+    top: 0;
+    height: 3.75rem;
     display: flex;
     align-items: flex-end;
     justify-content: center;
-  }
-  html.portrait .g-subs { display: flex; }
-  html.portrait .g-sub {
-    flex: 1;
+    text-align: center;
+    font-family: var(--tight);
     font-weight: 700;
-    font-size: 1.02rem;
-    line-height: 1.1;
-    color: var(--amber);
-    padding-bottom: .25rem;
-    border-bottom: .4rem solid;
-    margin: 0 .1rem;
-    border-radius: 0 0 .15rem .15rem;
-    white-space: nowrap;
+    font-size: 1.7rem;
+    line-height: .98;
+    color: var(--green-deep);
+    padding: 0 .1rem .3rem;
   }
+  .h-group.multi { font-size: 2.1rem; border-bottom: 3px solid var(--ink-soft); }
+  .h-tab {
+    position: absolute;
+    bottom: 0;
+    height: 2.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--tight);
+    font-weight: 700;
+    font-size: 1.45rem;
+    color: #FFFFFF;
+    border-radius: .45rem .45rem 0 0;
+    white-space: nowrap;
+    overflow: hidden;
+  }
+  .h-tab.dark { color: #17291E; }
+  .h-corner {
+    position: absolute;
+    left: 0;
+    top: .2rem;
+    text-align: center;
+    font-family: var(--tight);
+    font-weight: 700;
+    line-height: 1;
+    color: var(--ink);
+  }
+  .h-corner .c-today { font-size: .95rem; letter-spacing: .06em; color: var(--amber); }
+  .h-corner .c-day { font-size: 1.55rem; }
+  .h-corner .c-date { font-size: 1.05rem; color: var(--ink-soft); }
+  html.portrait .lane { border-top-left-radius: 0; border-top-right-radius: 0; }
   html.portrait .side { width: 3.3rem; }
   html.portrait .tick { right: .35rem; transform: translateY(-50%); }
   html.portrait .now-pill { right: .05rem; transform: translateY(-50%); }
@@ -285,7 +316,7 @@
 <body class="day">
 <header>
   <div>
-    <div class="eyebrow">Akron Food Works &middot; In the kitchen</div>
+    <div class="eyebrow">Today&rsquo;s schedule &middot; every kitchen space</div>
     <h1 id="title">What&rsquo;s cooking <em>today.</em></h1>
   </div>
   <div class="meta">
@@ -323,7 +354,7 @@
     { cal: "Create Kitchen - WHOLE ROOM", group: "Create Kitchen", l1: "Create Kitchen", l2: "Whole Room", sub: "Whole Room" },
     { cal: "Create Kitchen - LEFT SIDE",  group: "Create Kitchen", l1: "Create Kitchen", l2: "Left Side",  sub: "Left Side" },
     { cal: "Create Kitchen - RIGHT SIDE", group: "Create Kitchen", l1: "Create Kitchen", l2: "Right Side", sub: "Right Side" },
-    { cal: "Elevate (Main) Kitchen",      group: "Elevate Kitchen", l1: "Elevate Kitchen", l2: "Main", sub: "Main" },
+    { cal: "Elevate (Main) Kitchen",      group: "Elevate", l1: "Elevate Kitchen", l2: "Main", sub: "Main Kitchen" },
     { cal: "NEW Prep/Specialty Kitchen",  group: "Prep / Specialty", l1: "Prep / Specialty", l2: "Kitchen", sub: "Kitchen" },
     { cal: "Warewashing/Cleanup Area",    group: "Warewashing", l1: "Warewashing", l2: "Cleanup Area", sub: "Cleanup Area" }
   ];
@@ -345,6 +376,7 @@
   });
   var dateFmt = new Intl.DateTimeFormat("en-US", { timeZone: TZ, weekday: "long", month: "long", day: "numeric" });
   var weekdayFmt = new Intl.DateTimeFormat("en-US", { timeZone: TZ, weekday: "short" });
+  function shortDate(ms) { var p = parts(ms); return p.m + "/" + p.d; }
 
   function parts(ms) {
     var p = {};
@@ -432,6 +464,40 @@
     else { node.style.left = startPct + "%"; if (lenPct != null) node.style.width = lenPct + "%"; }
   }
 
+  // Portrait column headers: a group title over each group of spaces and a
+  // tab in the space's colour on top of each column, all positioned from
+  // the columns' real boxes so nothing can drift out of line.
+  function placeHeads(heads, laneNodes, colors, w) {
+    var hb = heads.getBoundingClientRect();
+    var boxes = laneNodes.map(function (ln) { return ln.node.getBoundingClientRect(); });
+    var groups = [];
+    laneNodes.forEach(function (ln, i) {
+      var g = groups.length && groups[groups.length - 1].name === ln.space.group ? groups[groups.length - 1] : null;
+      if (!g) { g = { name: ln.space.group, first: i, last: i }; groups.push(g); }
+      g.last = i;
+    });
+    groups.forEach(function (g) {
+      var ge = el("div", "h-group" + (g.last > g.first ? " multi" : ""), g.name);
+      ge.style.left = (boxes[g.first].left - hb.left) + "px";
+      ge.style.width = (boxes[g.last].right - boxes[g.first].left) + "px";
+      heads.appendChild(ge);
+    });
+    laneNodes.forEach(function (ln, i) {
+      var tab = el("div", "h-tab" + (isLight(ln.color) ? " dark" : ""), ln.space.sub);
+      tab.style.background = ln.color;
+      tab.style.left = (boxes[i].left - hb.left) + "px";
+      tab.style.width = boxes[i].width + "px";
+      heads.appendChild(tab);
+    });
+    // top-left corner: which day the top of the timeline is
+    var corner = el("div", "h-corner");
+    corner.style.width = (boxes[0].left - hb.left) + "px";
+    if (midnightOf(w.start) === midnightOf(now())) corner.appendChild(el("div", "c-today", "TODAY"));
+    corner.appendChild(el("div", "c-day", weekdayFmt.format(new Date(w.start)).toUpperCase()));
+    corner.appendChild(el("div", "c-date", shortDate(w.start)));
+    heads.appendChild(corner);
+  }
+
   function render() {
     var w = windowFor(now());
     current = w;
@@ -463,35 +529,16 @@
     var ticks = live.ticks = [];
     for (var i = 0; i <= hours; i++) {
       var tAt = w.start + i * HOUR;
-      var t = parts(tAt).h === 0
-        ? el("div", "tick day-mark", weekdayFmt.format(new Date(tAt)))
-        : el("div", "tick", clock(tAt));
+      var t;
+      if (parts(tAt).h === 0) {
+        t = el("div", "tick day-mark", weekdayFmt.format(new Date(tAt)).toUpperCase());
+        t.appendChild(el("small", null, shortDate(tAt)));
+      } else {
+        t = el("div", "tick", clock(tAt));
+      }
       setPos(t, i / hours * 100);
       tickHost.appendChild(t);
       ticks.push({ node: t, at: tAt });
-    }
-
-    // column headers (portrait) — spaces sharing a group get one title
-    if (layout === "portrait") {
-      var groups = [];
-      SPACES.forEach(function (s) {
-        var g = groups.length && groups[groups.length - 1].name === s.group ? groups[groups.length - 1] : null;
-        if (!g) { g = { name: s.group, spaces: [] }; groups.push(g); }
-        g.spaces.push(s);
-      });
-      groups.forEach(function (g) {
-        var ge = el("div", "group");
-        ge.style.flex = g.spaces.length + " 1 0";
-        ge.appendChild(el("div", "g-title", g.name));
-        var subs = el("div", "g-subs");
-        g.spaces.forEach(function (s) {
-          var se = el("div", "g-sub", s.sub);
-          se.style.borderBottomColor = colors[s.cal] || DEFAULT_COLOR;
-          subs.appendChild(se);
-        });
-        ge.appendChild(subs);
-        heads.appendChild(ge);
-      });
     }
 
     // lanes
@@ -499,6 +546,11 @@
       ? "linear-gradient(to bottom, var(--line) 1px, transparent 1px)"
       : "linear-gradient(to right, var(--line) 1px, transparent 1px)";
     var gridSize = layout === "portrait" ? "100% " + (100 / hours) + "%" : (100 / hours) + "% 100%";
+
+    var t0 = now(), today = midnightOf(t0), midnight = null;
+    for (var k = 1; k < hours; k++) if (parts(w.start + k * HOUR).h === 0) midnight = w.start + k * HOUR;
+    var other = midnight == null ? null
+      : midnight > t0 ? [midnight, w.end] : [w.start, midnight];
 
     var laneNodes = [];
     SPACES.forEach(function (s) {
@@ -532,6 +584,14 @@
     live.lines = [];
     live.blocks = [];
     laneNodes.forEach(function (ln) {
+      if (other) {
+        var od = el("div", "other-day");
+        setPos(od, (other[0] - w.start) / span * 100, (other[1] - other[0]) / span * 100);
+        ln.node.appendChild(od);
+        var dl = el("div", "day-line");
+        setPos(dl, (midnight - w.start) / span * 100);
+        ln.node.appendChild(dl);
+      }
       var shade = el("div", "past");
       var line = el("div", "now-line");
       ln.node.appendChild(shade);
@@ -548,6 +608,7 @@
     frag.appendChild(grid);
     card.innerHTML = "";
     card.appendChild(frag);
+    if (layout === "portrait") placeHeads(heads, laneNodes, colors, w);
 
     // size each booking now that the lanes have real dimensions
     var rem = parseFloat(getComputedStyle(document.documentElement).fontSize);
@@ -568,7 +629,9 @@
         blk.style.background = ln.color;
         setPos(blk, startPct, lenPct);
         blk.appendChild(el("div", "b-title", b.title));
-        var timeEl = el("div", "b-time", timeRange(b.startDate, b.endDate));
+        // bookings that start on another day say which day
+        var dayTag = midnightOf(b.startDate) !== today ? weekdayFmt.format(new Date(b.startDate)) + " " : "";
+        var timeEl = el("div", "b-time", dayTag + timeRange(b.startDate, b.endDate));
         blk.appendChild(timeEl);
         // bottom/right edges sit a hair inside the slot so back-to-back bookings don't touch
         if (layout === "portrait") blk.style.marginTop = "1px"; else blk.style.marginLeft = "1px";
